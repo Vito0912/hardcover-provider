@@ -1,0 +1,8 @@
+services:
+  hardcover-api:
+    build: .
+    ports:
+      - "7790:7790"
+    volumes:
+      - ./file_cache:/app/file_cache
+      - .:/app
