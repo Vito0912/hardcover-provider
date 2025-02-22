@@ -18,13 +18,13 @@ class ApiKeys:
         self.save_keys()
 
     def save_keys(self):
-        with open("api_keys.txt", "w") as f:
+        with open("./file_cache/api_keys.txt", "w") as f:
             for key in self.api_keys:
                 f.write(f"{key.key},{key.uses},{key.expires},{key.cap}\n")
 
     def load_keys(self):
         try:
-            with open("api_keys.txt", "r") as f:
+            with open("./file_cache/api_keys.txt", "r") as f:
                 for line in f:
                     key, uses, expires, cap = line.strip().split(",")
                     api_key = ApiKey(
