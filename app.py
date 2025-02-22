@@ -33,7 +33,7 @@ def get_api_key(api_key: str = Depends(api_key_header)):
 
 
 def search_for_books(query: str, author: Optional[str], lang: Optional[str], type: Optional[str]) -> list[BookMetadata]:
-    url = "https://search.hardcover.app:8108/multi_search?x-typesense-api-key=cf0jYiqkIXNYh2EnJr1RqHIYJbKOGoGk"
+    url = "	https://search.hardcover.app/multi_search?x-typesense-api-key=cf0jYiqkIXNYh2EnJr1RqHIYJbKOGoGk"
     headers = {
         'User-Agent': UserAgent().random,
         'Content-Type': 'application/json'
@@ -148,38 +148,45 @@ def search_for_books(query: str, author: Optional[str], lang: Optional[str], typ
     data = response.json()
 
     matches = []
+    try:
+        for book in data["data"]["books"]:
+            for edition in book.get("editions", {}):
 
-    for book in data["data"]["books"]:
-        for edition in book.get("editions", {}):
+                series_list = edition.get("book_series", [])
+                authors_edition = [contribution["author"]["name"]
+                                   for contribution in edition.get("contributions", [])
+                                   if "author" in contribution and "name" in contribution["author"]]
+                authors_book = None
+                if not authors_edition:
+                    authors_book = [contribution["author"]["name"]
+                                    for contribution in book.get("contributions", [])
+                                    if "author" in contribution and "name" in contribution["author"]]
 
-            series_list = edition.get("book_series", [])
-            authors_edition = [contribution["author"]["name"]
-                               for contribution in edition.get("contributions", [])
-                               if "author" in contribution and "name" in contribution["author"]]
-            authors_book = None
-            if not authors_edition:
-                authors_book = [contribution["author"]["name"]
-                                for contribution in book.get("contributions", [])
-                                if "author" in contribution and "name" in contribution["author"]]
+                author = ", ".join(authors_edition) if authors_edition else ", ".join(authors_book)
 
-            author = ", ".join(authors_edition) if authors_edition else ", ".join(authors_book)
-
-            matches.append(BookMetadata(
-                title=edition.get("title") or book.get("title"),
-                subtitle=edition.get("subtitle"),
-                author=author,
-                publisher=edition.get("publisher", {}).get("name") if edition.get("publisher") else None,
-                publishedYear=edition.get("releaseYear"),
-                description=edition.get("description") or book.get("description"),
-                cover=edition.get("cachedImage", {}).get("url") if edition.get("cachedImage") else None,
-                isbn=edition.get("isbn13"),
-                asin=edition.get("asin"),
-                tags=[tag["tag"]["tag"] for tag in edition.get("taggings", []) if tag.get("tag")],
-                series=[SeriesMetadata(series=series["series"]["name"], sequence=series["position"]) for series in
-                        series_list] if series_list else [],
-                language=edition.get("language", {}).get("language") if edition.get("language") else None,
-                duration=int(str(edition.get("audioSeconds"))) / 60 if edition.get("audioSeconds") else None
-            ))
+                matches.append(BookMetadata(
+                    title=edition.get("title") or book.get("title"),
+                    subtitle=edition.get("subtitle"),
+                    author=author,
+                    publisher=edition.get("publisher", {}).get("name") if edition.get("publisher") else None,
+                    publishedYear=edition.get("releaseYear"),
+                    description=edition.get("description") or book.get("description"),
+                    cover=edition.get("cachedImage", {}).get("url") if edition.get("cachedImage") else None,
+                    isbn=edition.get("isbn13"),
+                    asin=edition.get("asin"),
+                    tags=[tag["tag"]["tag"] for tag in edition.get("taggings", []) if tag.get("tag")],
+                    series=[SeriesMetadata(series=series["series"]["name"], sequence=series["position"]) for series in
+                            series_list] if series_list else [],
+                    language=edition.get("language", {}).get("language") if edition.get("language") else None,
+                    duration=int(str(edition.get("audioSeconds"))) / 60 if edition.get("audioSeconds") else None
+                ))
+    except Exception as e:
+        logger.error(f"Error parsing response: {e}")
+        logger.error(f"Response: {data}")
+        raise HTTPException(
+            status_code=500,
+            detail="Error parsing response"
+        )
 
     return matches
 

@@ -47,7 +47,6 @@ class ApiKeys:
         for key in self.api_keys:
 
             if key.resetTime < int(time.time()):
-                logging.info(f"Resetting API key: {key.key}")
                 key.uses = 1
                 key.resetTime = int(time.time()) + 60
                 return key
