@@ -10,7 +10,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,4 +33,4 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/vito0912/abs-hardcover:latest
+          tags: ghcr.io/vito0912/hardcover-provider:latest
