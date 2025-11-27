@@ -33,7 +33,7 @@ def get_api_key(api_key: str = Depends(api_key_header)):
 
 
 def search_for_books(query: str, author: Optional[str], lang: Optional[str], type: Optional[str]) -> list[BookMetadata]:
-    url = "	https://search.hardcover.app/multi_search?x-typesense-api-key=cf0jYiqkIXNYh2EnJr1RqHIYJbKOGoGk"
+    url = "https://production-search.hardcover.app/multi_search?x-typesense-api-key=6fVaVYkPPPBurjELLAmzIj8gBG1FnClB"
     headers = {
         'User-Agent': UserAgent().random,
         'Content-Type': 'application/json'
