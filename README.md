@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This is now part of https://github.com/vito0912/abs-agg, although with less functionality due to reduced flexibility in the Hardcovers API
+
 # Hardcover Metadata Provider for ABS
 
 This repository provides a service instance for the Hardcover API to use as a metadata Provider for ABS. Although the rate limit can be expanded easily, it is currently capped for the reasons outlined in this README. If you use this provider normally you should never hit it.
